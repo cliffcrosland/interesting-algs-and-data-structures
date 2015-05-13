@@ -1,19 +1,22 @@
 package com.cliffcrosland;
 
-import com.cliffcrosland.levenshtein.LevenshteinDistance;
 
+import com.cliffcrosland.heap.MinHeap;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
 
     public static void main(String[] args) {
-        String source = "institution";
-        String target = "intuition";
-        int distance = LevenshteinDistance.distance(source, target);
-        System.out.println(distance);
-        List<String> steps = LevenshteinDistance.transformationSteps(source, target);
-        for (String step : steps) {
-            System.out.println(step);
+        List<Integer> values = Arrays.asList(4, 1, 45, 12, 3, 6, 23, 5, 6);
+        MinHeap<Integer> heap = new MinHeap<Integer>(values);
+        while (heap.size() > 0) {
+            System.out.println(heap.popMin());
         }
+
+
+
     }
 }
