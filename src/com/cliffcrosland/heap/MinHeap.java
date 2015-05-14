@@ -22,10 +22,12 @@ public class MinHeap<T extends Comparable> {
         heap = newHeap;
     }
 
+    // O(1)
     public T peekMin() {
         return heap.get(0);
     }
 
+    // O(log n)
     public T popMin() {
         T min = heap.get(0);
         swap(heap, 0, heap.size() - 1);
@@ -34,6 +36,7 @@ public class MinHeap<T extends Comparable> {
         return min;
     }
 
+    // O(log n)
     public void add(T item) {
         heap.add(item);
         heapifyUpward(heap, heap.size() - 1);
@@ -43,6 +46,27 @@ public class MinHeap<T extends Comparable> {
         return heap.size();
     }
 
+    // A heap can clearly be created in O(n log n) time, but we can do better. The `makeHeap` algorithm below creates a
+    // heap in O(n) time. Proof via amortized analysis:
+    //
+    // Sprinkle $2 on each node. Say that we spend $1 each time we visit a node. If we can make a full heap without
+    // paying more than the $2*n we started with, then our algorithm's performance is linear. We claim that the final
+    // heap will have at least $H left of the original $2*n where H is the height of the heap, so we will have created a
+    // heap using O(n) dollars. In fact, we claim that, as we create heaps from the leaves upward, each heap will have
+    // $h in it where h is its height.
+    //
+    // Base case: The leaves all start with $2. We visit each one, spending $1 on each. They are all valid heaps of
+    // height 1, and each has $1 remaining.
+    //
+    // Induction step: Say we have finished building all heaps of height h, and each has $h left. Now we go to transform
+    // a tree of height h + 1 into a heap. The parent may be out of place, but the children are valid heaps of height
+    // h. We start with $(2*h + 2) dollars since the parent has $2 and each heap has $h left. We visit the parent,
+    // spending $1, and swap it with children down the tree a maximum of h times until it is in place. We thus will
+    // spend a maximum of $(h + 1) dollars of the original $(2*h + 2) to create the heap of height h + 1, so the heap
+    // will have at least $(h + 1) dollars left in it.
+    //
+    // By induction, the full heap will have at least $H left of the original $2*n, so the algorithm's runtime is
+    // linear.
     private void makeHeap(List<T> list) {
         for (int i = list.size() - 1; i >= 0; i--) {
             heapifyDownward(list, i);

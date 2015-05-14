@@ -13,6 +13,7 @@ public class LevenshteinDistance {
         return distances[source.length()][target.length()];
     }
 
+    // O(n*m) to compute matrix plus O(n+m) to trace back transformation steps
     public static List<String> transformationSteps(String source, String target) {
         int[][] distances = computeLevenshteinDistances(source, target);
         List<String> alignmentSteps = new ArrayList<String>();

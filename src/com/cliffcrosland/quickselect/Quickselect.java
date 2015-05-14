@@ -18,7 +18,7 @@ public class Quickselect {
         return select(copy, 0, arr.length - 1, n);
     }
 
-    // Select the n-th smallest element
+    // Select the n-th smallest element. Best, average case O(n). Worst case O(n^2)
     private static <T extends Comparable> T select(List<T> arr, int start, int end, int n) {
         // Pivot value. We want to move everything smaller than this value to the left, everything not smaller to the
         // right.

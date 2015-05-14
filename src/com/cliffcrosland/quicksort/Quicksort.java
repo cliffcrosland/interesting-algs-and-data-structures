@@ -5,6 +5,7 @@ public class Quicksort {
         quicksort(arr, 0, arr.length - 1);
     }
 
+    // Average, Best case O(n log n). Worst case O(n^2) if pivots are always extremes, but that is unlikely.
     private static void quicksort(Comparable[] arr, int start, int end) {
         if (start >= end) return;
         // Pivot value. We want to move everything smaller than this value to the left, everything not smaller to the
