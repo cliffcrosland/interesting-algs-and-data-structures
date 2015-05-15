@@ -1,7 +1,5 @@
 package com.cliffcrosland.knuthmorrispratt;
 
-import com.cliffcrosland.debugutils.DebugUtils;
-
 public class KnuthMorrisPrattStringSearch {
 
     // Find the first index where `needle` occurs in `haystack`. If it doesn't occur, return -1.
@@ -31,6 +29,7 @@ public class KnuthMorrisPrattStringSearch {
     // elements. T[i] indicates the number of elements you can skip ahead from the beginning of
     // `needle` if character i in `needle` does not match in haystack. Performance is O(m) where
     // m is the length of `needle`.
+
     private static int[] computeSkipAheadList(String needle) {
         int[] skipAheadList = new int[needle.length()];
         skipAheadList[0] = -1;
