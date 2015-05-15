@@ -1,5 +1,7 @@
 package com.cliffcrosland.knuthmorrispratt;
 
+import com.cliffcrosland.debugutils.DebugUtils;
+
 /**
  * Created by cliftoncrosland on 5/14/15.
  */
@@ -13,7 +15,7 @@ public class KnuthMorrisPrattStringSearch {
         int i = 0;
         int[] skipAheadList = computeSkipAheadList(needle);
         while (matchStart + i < haystack.length()) {
-            if (i >= needle.length()) {
+            if (i == needle.length()) {
                 return matchStart;
             } else if (haystack.charAt(matchStart + i) == needle.charAt(i)) {
                 i++;
@@ -24,7 +26,9 @@ public class KnuthMorrisPrattStringSearch {
                 i = skipAheadList[i];
             }
         }
-        return -1;
+        return (i == needle.length())
+                ? matchStart
+                : -1;
     }
 
     // Compute the "skip ahead" table for `needle`. The table (call it T) contains len(needle)
