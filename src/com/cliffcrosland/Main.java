@@ -9,18 +9,24 @@ import java.util.List;
 public class Main {
 
     public static void main(String[] args) {
+        /*
+        String haystack = "DCDAAABBABEABBCBEECA";
+        String needle = "AABB";
+        int index = KnuthMorrisPrattStringSearch.indexOf(needle, haystack);
+        System.out.println(index);
+        */
         runStressTests();
     }
 
     private static void runStressTests() {
         long start, end;
-        int trials = 1000;
+        int trials = 10000;
         List<Integer> indicesFoundByMe = new ArrayList<Integer>(trials);
         List<Integer> indicesFoundByJava = new ArrayList<Integer>(trials);
         List<String> haystacks = new ArrayList<String>(trials);
         List<String> needles = new ArrayList<String>(trials);
         for (int i = 0; i < trials; i++) {
-            haystacks.add(generateRandomStringFromAlphabet("ABCDE", 20));
+            haystacks.add(generateRandomStringFromAlphabet("ABCDE", 100));
             needles.add(generateRandomStringFromAlphabet("ABCDE", 4));
         }
 
