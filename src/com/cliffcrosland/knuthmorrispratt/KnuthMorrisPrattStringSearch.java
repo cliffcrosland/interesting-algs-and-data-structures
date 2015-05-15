@@ -7,7 +7,7 @@ public class KnuthMorrisPrattStringSearch {
 
     // Find the first index where `needle` occurs in `haystack`. If it doesn't occur, return -1.
     // If n is the length of `haystack` and m is the length of `needle`, the algorithm runs in
-    // O(n + m) time, and since n >= m, it runs in O(n).
+    // O(n + m) time, and since n >= m, we can say it runs in O(n) time.
     public static int indexOf(String needle, String haystack) {
         int matchStart = 0;
         int i = 0;
