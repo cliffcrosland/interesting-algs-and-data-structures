@@ -99,9 +99,9 @@ public class KDTree {
                 // than the root would be invalidated.
                 //
                 // However, we can succeed! Since the root has no right sub-tree, we can move the left sub-tree to
-                // be over on the right, and we can replace the root with the point with the minimum cutting dimension
-                // from the new right sub-tree. Then, everything in the right sub-tree has cutting dimension greater
-                // than or equal to the root, so everything is honky dory.
+                // be over on the right, and we can replace the root with the point that has the minimum cutting
+                // dimension from the new right sub-tree. Then, everything in the right sub-tree has cutting dimension
+                // greater than or equal to the root, so everything is honky dory.
                 root.point = findMinPointForCuttingDimension(root.left, cuttingDim, depth + 1);
                 root.right = recursiveRemove(root.left, root.point, depth + 1);
                 root.left = null;
@@ -174,9 +174,9 @@ public class KDTree {
             bestGuess.point = root.point;
             bestGuess.distance = distance;
         }
-        int cuttinDim = depth % numDimensions;
-        double rootCoord = root.point[cuttinDim];
-        double targetCoord = target[cuttinDim];
+        int cuttingDim = depth % numDimensions;
+        double rootCoord = root.point[cuttingDim];
+        double targetCoord = target[cuttingDim];
         KDNode next, other;
         if (targetCoord < rootCoord) {
             next = root.left;
@@ -187,9 +187,9 @@ public class KDTree {
         }
         // Recurse into the region that contains the target point.
         recursiveGetNearestNeighbor(next, target, depth + 1, bestGuess);
-        // If the radius of the circle from the target point to the best guess point is greater than the
-        // difference along the axis between the target and the root, then a point closer than the best
-        // guess might be in the other region that does not contain the target. We must check over there too.
+        // If the radius of the circle from the target point to the best guess point is greater than the distance
+        // between the target and the root in the current cutting dimension, then a point closer than the best guess
+        // might be in the other region that does not contain the target. We must check over there too.
         if (Math.abs(targetCoord - rootCoord) < bestGuess.distance) {
             recursiveGetNearestNeighbor(other, target, depth + 1, bestGuess);
         }
