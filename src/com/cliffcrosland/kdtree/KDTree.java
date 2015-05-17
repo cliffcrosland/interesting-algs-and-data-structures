@@ -1,5 +1,9 @@
 package com.cliffcrosland.kdtree;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+
 /**
  * Created by cliftoncrosland on 5/16/15.
  */
@@ -13,14 +17,21 @@ public class KDTree {
         root = null;
     }
 
+    public KDTree(int numDimensions, List<double[]> points) {
+        this(numDimensions);
+        constructBalancedKDTree(points);
+    }
+
     public void add(double[] point) {
         assertSameDimensionsAsTree(point);
-        if (root == null) {
-            root = new KDNode(point);
-        } else {
-            recursiveAdd(root, point, 0);
-        }
+        root = recursiveAdd(root, point, 0);
         size++;
+    }
+
+    public void remove(double[] point) {
+        assertSameDimensionsAsTree(point);
+        root = recursiveRemove(root, point, 0);
+        size--;
     }
 
     public boolean contains(double[] point) {
@@ -28,7 +39,7 @@ public class KDTree {
         return recursiveContainsPoint(root, point, 0);
     }
 
-    public double[] nearestNeighbor(double[] point) {
+    public double[] getNearestNeighbor(double[] point) {
         NearestNeighborBestGuess bestGuess = new NearestNeighborBestGuess();
         bestGuess.distance = Double.POSITIVE_INFINITY;
         recursiveGetNearestNeighbor(root, point, 0, bestGuess);
@@ -43,7 +54,7 @@ public class KDTree {
         return size == 0;
     }
 
-    // Helpers //
+    // === Helpers ===
 
     private void assertSameDimensionsAsTree(double[] point) {
         if (point.length != numDimensions) {
@@ -51,23 +62,90 @@ public class KDTree {
         }
     }
 
-    private void recursiveAdd(KDNode root, double[] point, int depth) {
-        int coordI = depth % numDimensions;
-        double rootCoord = root.point[coordI];
-        double pointCoord = point[coordI];
+    private KDNode recursiveAdd(KDNode root, double[] point, int depth) {
+        if (root == null) {
+            return new KDNode(point);
+        }
+        int cuttingDim = depth % numDimensions;
+        double rootCoord = root.point[cuttingDim];
+        double pointCoord = point[cuttingDim];
         if (pointCoord < rootCoord) {
-            if (root.left == null) {
-                root.left = new KDNode(point);
-            } else {
-                recursiveAdd(root.left, point, depth + 1);
-            }
+            root.left = recursiveAdd(root.left, point, depth + 1);
         } else {
-            if (root.right == null) {
-                root.right = new KDNode(point);
+            root.right = recursiveAdd(root.right, point, depth + 1);
+        }
+        return root;
+    }
+
+    private KDNode recursiveRemove(KDNode root, double[] target, int depth) {
+        if (root == null) {
+            throw new IllegalArgumentException("Cannot delete. Point does not exist in tree.");
+        }
+        int cuttingDim = depth % numDimensions;
+        double rootCoord = root.point[cuttingDim];
+        double targetCoord = target[cuttingDim];
+        if (arePointsEqual(root.point, target)) {
+            if (root.right != null) {
+                // If there is a right sub-tree, we can replace the root with the point in the right sub-tree with the
+                // minimum given cutting dimension. When we do so every point in the right sub-tree will have cutting
+                // dimension greater than or equal to the new root, so everything is honky dory.
+                root.point = findMinPointForCuttingDimension(root.right, cuttingDim, depth + 1);
+                root.right = recursiveRemove(root.right, root.point, depth + 1);
+            } else if (root.left != null) {
+                // If there is no right sub-tree, we might think about replacing the root with the point in the left
+                // sub-tree with the maximum given cutting dimension. However, there could actually be duplicate points
+                // in the left sub-tree that all have the same max cutting dimension. If we use one of them as the new
+                // root, then the invariant that every point in the left sub-tree has strictly lesser cutting dimension
+                // than the root would be invalidated.
+                //
+                // However, we can succeed! Since the root has no right sub-tree, we can move the left sub-tree to
+                // be over on the right, and we can replace the root with the point with the minimum cutting dimension
+                // from the new right sub-tree. Then, everything in the right sub-tree has cutting dimension greater
+                // than or equal to the root, so everything is honky dory.
+                root.point = findMinPointForCuttingDimension(root.left, cuttingDim, depth + 1);
+                root.right = recursiveRemove(root.left, root.point, depth + 1);
+                root.left = null;
             } else {
-                recursiveAdd(root.right, point, depth + 1);
+                // We are a leaf. Can remove self.
+                return null;
+            }
+        } else if (targetCoord < rootCoord) {
+            root.left = recursiveRemove(root.left, target, depth + 1);
+        } else {
+            root.right = recursiveRemove(root.right, target, depth + 1);
+        }
+        return root;
+    }
+
+    private double[] findMinPointForCuttingDimension(KDNode root, int cuttingDim, int depth) {
+        if (root == null) {
+            return null;
+        }
+        if (depth % numDimensions == cuttingDim) {
+            if (root.left == null) {
+                // This is the minimum point in this sub-tree for the given cutting dimension.
+                return root.point;
+            }
+            return findMinPointForCuttingDimension(root.left, cuttingDim, depth + 1);
+        }
+        double[] leftPoint = findMinPointForCuttingDimension(root.left, cuttingDim, depth + 1);
+        double[] rightPoint = findMinPointForCuttingDimension(root.right, cuttingDim, depth + 1);
+        return minimumPointForCuttingDimension(cuttingDim, leftPoint, rightPoint, root.point);
+    }
+
+    private static double[] minimumPointForCuttingDimension(int cuttingDim, double[]... points) {
+        if (points.length == 0) {
+            throw new IllegalArgumentException("Cannot ask for minimum point when no points are given.");
+        }
+        double[] minPointSoFar = null;
+        for (int i = 0; i < points.length; i++) {
+            double[] point = points[i];
+            if (point == null) continue;
+            if (minPointSoFar == null || point[cuttingDim] < minPointSoFar[cuttingDim]) {
+                minPointSoFar = point;
             }
         }
+        return minPointSoFar;
     }
 
     private boolean recursiveContainsPoint(KDNode root, double[] target, int depth) {
@@ -77,9 +155,9 @@ public class KDTree {
         if (arePointsEqual(root.point, target)) {
             return true;
         }
-        int coordI = depth % numDimensions;
-        double rootCoord = root.point[coordI];
-        double targetCoord = target[coordI];
+        int cuttingDim = depth % numDimensions;
+        double rootCoord = root.point[cuttingDim];
+        double targetCoord = target[cuttingDim];
         if (targetCoord < rootCoord) {
             return recursiveContainsPoint(root.left, target, depth + 1);
         } else {
@@ -96,9 +174,9 @@ public class KDTree {
             bestGuess.point = root.point;
             bestGuess.distance = distance;
         }
-        int coordI = depth % numDimensions;
-        double rootCoord = root.point[coordI];
-        double targetCoord = target[coordI];
+        int cuttinDim = depth % numDimensions;
+        double rootCoord = root.point[cuttinDim];
+        double targetCoord = target[cuttinDim];
         KDNode next, other;
         if (targetCoord < rootCoord) {
             next = root.left;
@@ -111,10 +189,44 @@ public class KDTree {
         recursiveGetNearestNeighbor(next, target, depth + 1, bestGuess);
         // If the radius of the circle from the target point to the best guess point is greater than the
         // difference along the axis between the target and the root, then a point closer than the best
-        // guess might be in the other region that does not contain the target. We must check over there.
+        // guess might be in the other region that does not contain the target. We must check over there too.
         if (Math.abs(targetCoord - rootCoord) < bestGuess.distance) {
             recursiveGetNearestNeighbor(other, target, depth + 1, bestGuess);
         }
+    }
+
+    private void constructBalancedKDTree(List<double[]> points) {
+        root = recursiveConstructBalancedKDTree(points, 0);
+        size = points.size();
+    }
+
+    // Intelligently construct balanced KD tree from a list of points. When choosing the root of a subtree, pick the
+    // point that gives the median value for cutting dimension at the first depth in the tree, then recurse on the
+    // children, picking medians from the left and right sub-trees for the next cutting dimension, and so on.
+    private KDNode recursiveConstructBalancedKDTree(List<double[]> points, int depth) {
+        if (points.size() == 0) {
+            return null;
+        }
+        final int cuttingDim = depth % numDimensions;
+        points = new ArrayList<double[]>(points);
+        points.sort(new Comparator<double[]>() {
+            @Override
+            public int compare(double[] pointA, double[] pointB) {
+                double diff = pointA[cuttingDim] - pointB[cuttingDim];
+                if (diff < 0.0) return -1;
+                if (diff > 0.0) return 1;
+                return 0;
+            }
+        });
+        int medianIndex = points.size() / 2;
+        List<double[]> leftPoints = new ArrayList<double[]>(points.subList(0, medianIndex));
+        List<double[]> rightPoints = new ArrayList<double[]>(points.subList(medianIndex + 1, points.size()));
+        double[] medianPoint = points.get(medianIndex);
+        assertSameDimensionsAsTree(medianPoint);
+        KDNode root = new KDNode(medianPoint);
+        root.left = recursiveConstructBalancedKDTree(leftPoints, depth + 1);
+        root.right = recursiveConstructBalancedKDTree(rightPoints, depth + 1);
+        return root;
     }
 
     private static boolean arePointsEqual(double[] pointA, double[] pointB) {
@@ -136,13 +248,6 @@ public class KDTree {
             sum += (coordA - coordB) * (coordA - coordB);
         }
         return Math.sqrt(sum);
-    }
-
-    private static int numChildren(KDNode node) {
-        int numChildren = 0;
-        if (node.left != null) numChildren++;
-        if (node.right != null) numChildren++;
-        return numChildren;
     }
 
     private class KDNode {
