@@ -7,7 +7,8 @@ import java.util.List;
 
 /*
  * Priority queue that will not grow beyond a certain size. Will eject the item with max priority if the queue grows
- * beyond the max-size. O(1) lookup for min and max. O(log n) removing min or max.
+ * beyond the max-size. O(1) lookup for min and max. O(log n) removing min or max. Backing data structure is a min-max
+ * heap.
  */
 public class BoundedPriorityQueue<T> {
 
