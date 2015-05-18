@@ -84,14 +84,14 @@ public class BoundedPriorityQueue<T> {
     public List<T> toListOrderedByPriority() {
         List<PriorityQueueNode<T>> nodes = new ArrayList<PriorityQueueNode<T>>(heap.size());
         List<T> ret = new ArrayList<T>(heap.size());
+        // O(n log n) to pop min `n` times.
         while (heap.size() > 0) {
             PriorityQueueNode<T> node = heap.popMin();
             nodes.add(node);
             ret.add(node.value);
         }
-        for (PriorityQueueNode<T> node : nodes) {
-            heap.add(node);
-        }
+        // O(n) to rebuild a min-max heap from the raw list of nodes
+        heap = new MinMaxHeap<PriorityQueueNode<T>>(nodes);
         return ret;
     }
 
