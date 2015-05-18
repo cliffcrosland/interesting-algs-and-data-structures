@@ -1,5 +1,8 @@
 package com.cliffcrosland.kdtree;
 
+import com.cliffcrosland.boundedpriorityqueue.BoundedPriorityQueue;
+import com.cliffcrosland.quickselect.Quickselect;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -17,33 +20,46 @@ public class KDTree {
         root = null;
     }
 
+    // O(n^2) to construct a balanced KD tree, which requires choosing median roots for each subtree.
     public KDTree(int numDimensions, List<double[]> points) {
         this(numDimensions);
         constructBalancedKDTree(points);
     }
 
+    // O(log n) to add a new point
     public void add(double[] point) {
         assertSameDimensionsAsTree(point);
         root = recursiveAdd(root, point, 0);
         size++;
     }
 
+    // O(log n) to remove a point
     public void remove(double[] point) {
         assertSameDimensionsAsTree(point);
         root = recursiveRemove(root, point, 0);
         size--;
     }
 
+    // O(log n) to see if the tree contains a point
     public boolean contains(double[] point) {
         assertSameDimensionsAsTree(point);
         return recursiveContainsPoint(root, point, 0);
     }
 
+    // O(log n + 2^dimensions) to find the single nearest neighbor. O(log n) steps are required to find the region
+    // near where the target point is, and O(2^dimensions) steps are required to try points in the vicinity.
     public double[] getNearestNeighbor(double[] point) {
-        NearestNeighborBestGuess bestGuess = new NearestNeighborBestGuess();
-        bestGuess.distance = Double.POSITIVE_INFINITY;
-        recursiveGetNearestNeighbor(root, point, 0, bestGuess);
-        return bestGuess.point;
+        return getKNearestNeighbors(point, 1).get(0);
+    }
+
+    // O(k * (log n + 2^dimensions)) to find the k nearest neighbors.
+    public List<double[]> getKNearestNeighbors(double[] point, int k) {
+        if (k <= 0) {
+            throw new IllegalArgumentException("k must be larger than 0");
+        }
+        BoundedPriorityQueue<double[]> neighbors = new BoundedPriorityQueue<double[]>(k);
+        recursiveGetKNearestNeighbors(root, point, 0, neighbors);
+        return neighbors.toListOrderedByPriority();
     }
 
     public int size() {
@@ -165,14 +181,14 @@ public class KDTree {
         }
     }
 
-    private void recursiveGetNearestNeighbor(KDNode root, double[] target, int depth, NearestNeighborBestGuess bestGuess) {
+    private void recursiveGetKNearestNeighbors(KDNode root, double[] target, int depth,
+                                               BoundedPriorityQueue<double[]> neighbors) {
         if (root == null) {
             return;
         }
         double distance = distance(root.point, target);
-        if (distance < bestGuess.distance) {
-            bestGuess.point = root.point;
-            bestGuess.distance = distance;
+        if (!neighbors.isFull() || distance <= neighbors.peekMaxPriority()) {
+            neighbors.add(root.point, distance);
         }
         int cuttingDim = depth % numDimensions;
         double rootCoord = root.point[cuttingDim];
@@ -186,12 +202,13 @@ public class KDTree {
             other = root.left;
         }
         // Recurse into the region that contains the target point.
-        recursiveGetNearestNeighbor(next, target, depth + 1, bestGuess);
-        // If the radius of the circle from the target point to the best guess point is greater than the distance
-        // between the target and the root in the current cutting dimension, then a point closer than the best guess
-        // might be in the other region that does not contain the target. We must check over there too.
-        if (Math.abs(targetCoord - rootCoord) < bestGuess.distance) {
-            recursiveGetNearestNeighbor(other, target, depth + 1, bestGuess);
+        recursiveGetKNearestNeighbors(next, target, depth + 1, neighbors);
+        // If we have found less than k nearest neighbors so far, we need to look into the other region to find more
+        // neighbors. Otherwise, if the circle from the target to the k-th furthest-away neighbor we've found so far
+        // crosses over into the other region, there might be a neighbor in that region that is closer than the
+        // k-th furthest-away we've found so far. Hence, we need to look into the other region in that case as well.
+        if (!neighbors.isFull() || Math.abs(targetCoord - rootCoord) < neighbors.peekMaxPriority()) {
+            recursiveGetKNearestNeighbors(other, target, depth + 1, neighbors);
         }
     }
 
@@ -209,7 +226,7 @@ public class KDTree {
         }
         final int cuttingDim = depth % numDimensions;
         points = new ArrayList<double[]>(points);
-        points.sort(new Comparator<double[]>() {
+        Comparator<double[]> cuttingDimComparator = new Comparator<double[]>() {
             @Override
             public int compare(double[] pointA, double[] pointB) {
                 double diff = pointA[cuttingDim] - pointB[cuttingDim];
@@ -217,13 +234,14 @@ public class KDTree {
                 if (diff > 0.0) return 1;
                 return 0;
             }
-        });
+        };
         int medianIndex = points.size() / 2;
-        List<double[]> leftPoints = new ArrayList<double[]>(points.subList(0, medianIndex));
-        List<double[]> rightPoints = new ArrayList<double[]>(points.subList(medianIndex + 1, points.size()));
-        double[] medianPoint = points.get(medianIndex);
+        int medianRank = medianIndex + 1;
+        double[] medianPoint = Quickselect.selectInPlace(points, medianRank, cuttingDimComparator);
         assertSameDimensionsAsTree(medianPoint);
         KDNode root = new KDNode(medianPoint);
+        List<double[]> leftPoints = new ArrayList<double[]>(points.subList(0, medianIndex));
+        List<double[]> rightPoints = new ArrayList<double[]>(points.subList(medianIndex + 1, points.size()));
         root.left = recursiveConstructBalancedKDTree(leftPoints, depth + 1);
         root.right = recursiveConstructBalancedKDTree(rightPoints, depth + 1);
         return root;

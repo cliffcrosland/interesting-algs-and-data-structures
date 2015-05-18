@@ -60,6 +60,26 @@ public class BoundedPriorityQueue<T> {
         return null;
     }
 
+    // O(1) - get size
+    public int size() {
+        return heap.size();
+    }
+
+    // O(1) - lookup max allowed size
+    public int maxSize() {
+        return maxSize;
+    }
+
+    // O(1) - is empty?
+    public boolean isEmpty() {
+        return heap.isEmpty();
+    }
+
+    // O(1) - is full?
+    public boolean isFull() {
+        return heap.size() == maxSize;
+    }
+
     // O(n log n) - Create a list of all of the items in the priority queue, ordered by priority.
     public List<T> toListOrderedByPriority() {
         List<PriorityQueueNode<T>> nodes = new ArrayList<PriorityQueueNode<T>>(heap.size());
