@@ -3,6 +3,14 @@ package com.cliffcrosland.minmaxheap;
 import java.util.ArrayList;
 import java.util.List;
 
+/*
+ * A heap that can find both max value and min value in O(1) time. Can be constructed from an array of values in O(n)
+ * time. `add`, `popMin`, and `popMax` operations each require O(log n) time. Uses implicit heap array using O(n) space.
+ *
+ * The big idea here is that a node at an even level is less than all of its descendants, whereas a node at an odd level
+ * is greater than all of its descendants. The min will be located at the root. The max will be one of the root's two
+ * children (or the root if the heap's size is 1, of course).
+ */
 public class MinMaxHeap<T extends Comparable> {
     private List<T> heap;
 
