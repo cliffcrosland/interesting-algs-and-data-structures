@@ -20,7 +20,7 @@ public class KDTree {
         root = null;
     }
 
-    // O(n^2) to construct a balanced KD tree, which requires choosing median roots for each subtree.
+    // O(n log n) to construct a balanced KD tree, which chooses median roots for each subtree.
     public KDTree(int numDimensions, List<double[]> points) {
         this(numDimensions);
         constructBalancedKDTree(points);
@@ -220,6 +220,16 @@ public class KDTree {
     // Intelligently construct balanced KD tree from a list of points. When choosing the root of a subtree, pick the
     // point that gives the median value for cutting dimension at the first depth in the tree, then recurse on the
     // children, picking medians from the left and right sub-trees for the next cutting dimension, and so on.
+    //
+    // The algorithm runs in O(n log n) time. At each level in the recursion, we do O(n) work, and there are O(log n)
+    // levels of recursion. Here's an informal explanation:
+    // - At the first level of recursion, we run quickselect in O(n) time to find the median, and then we recurse
+    //   on roughly n/2 elements to the left and n/2 elements to the right. Say this quickselect call runs in c*n time.
+    // - We then do quickselect on the left n/2 elements and on the right n/2 elements. Each takes c*(n/2) time.
+    //   Added together, c*(n/2) + c*(n/2) = c*n. Then we recurse on four groups of roughly n/4 elements each, each
+    //   of which will run quickselect in c*(n/4) time, for a combined total of 4*c*(n/4) = c*n time, and so on.
+    // - At each level of the recursion, c*n work is done, and there are log(n) levels of recursion. Thus the algorithm
+    //   runs in O(n log n) time.
     private KDNode recursiveConstructBalancedKDTree(List<double[]> points, int depth) {
         if (points.size() == 0) {
             return null;
