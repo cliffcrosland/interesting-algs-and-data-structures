@@ -31,9 +31,13 @@ public class KruskalMinSpanningTree {
         // a node's connected component will at least double in size when its parent pointer changes, which can only
         // occur a maximum of O(log V) times.
         for (GraphEdge edge : sortedEdges) {
+            // Most of the time, O(1) lookup to get root. If not O(1) lookup, at worst O(log V) lookup and internal
+            // updating. But each node will have its parent updated at most O(log V) times, so we have O(V log V)
+            // total work done during the entire loop.
             UnionFindTreeNode fromTreeRoot = unionFindMap.get(edge.from).getRoot();
             UnionFindTreeNode toTreeRoot = unionFindMap.get(edge.to).getRoot();
             if (fromTreeRoot.label == toTreeRoot.label) continue;
+            // O(1) to merge
             UnionFindTreeNode.merge(fromTreeRoot, toTreeRoot);
             minSpanningTree.add(edge);
         }
