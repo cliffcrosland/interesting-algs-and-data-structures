@@ -10,7 +10,7 @@ import java.util.*;
 /**
  * Created by cliftoncrosland on 5/27/15.
  */
-public class DijkstraShortestPathTest {
+public class DijkstraShortestPathTests {
 
     private static final boolean DEBUG = false;
 
