@@ -7,8 +7,11 @@ import com.cliffcrosland.graph.GraphNode;
 import java.util.*;
 
 public class KruskalMinSpanningTree {
+    // Runtime: O(E log V)
     public static Set<GraphEdge> findMinSpanningTree(Graph graph) {
         List<GraphEdge> sortedEdges = new ArrayList<GraphEdge>(graph.edges);
+        // Sorting occurs in O(E log V). Why O(E log V) instead of O(E log E)? Well, E is at most V^2, and
+        // log(V^2) = 2 log V = O(log V), so we can say O(E log V).
         sortedEdges.sort(new Comparator<GraphEdge>() {
             @Override
             public int compare(GraphEdge a, GraphEdge b) {
@@ -23,6 +26,10 @@ public class KruskalMinSpanningTree {
             unionFindMap.put(node, new UnionFindTreeNode(++label));
         }
         Set<GraphEdge> minSpanningTree = new HashSet<GraphEdge>();
+        // O(V log V), since each node's parent pointer will be updated at most O(log V) times. Reason: a node's
+        // parent pointer will only be updated if its connected component is merged with a larger one, which means
+        // a node's connected component will at least double in size when its parent pointer changes, which can only
+        // occur a maximum of O(log V) times.
         for (GraphEdge edge : sortedEdges) {
             UnionFindTreeNode fromTreeRoot = unionFindMap.get(edge.from).getRoot();
             UnionFindTreeNode toTreeRoot = unionFindMap.get(edge.to).getRoot();
@@ -30,6 +37,8 @@ public class KruskalMinSpanningTree {
             UnionFindTreeNode.merge(fromTreeRoot, toTreeRoot);
             minSpanningTree.add(edge);
         }
+
+        // O(E log V) + O(V log V) = O(E log V) since E is O(V^2)
         return minSpanningTree;
     }
 
