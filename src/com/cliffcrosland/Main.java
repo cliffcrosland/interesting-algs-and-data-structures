@@ -1,9 +1,11 @@
 package com.cliffcrosland;
 
-import com.cliffcrosland.kruskal.test.KruskalMinSpanningTreeTests;
+import com.cliffcrosland.sudoku.test.SudokuSolverTest;
 
 public class Main {
     public static void main(String[] args) {
-        KruskalMinSpanningTreeTests.runTestCasesFromFile();
+        for (int i = 0; i < 10; i++) {
+            SudokuSolverTest.runTests();
+        }
     }
 }
