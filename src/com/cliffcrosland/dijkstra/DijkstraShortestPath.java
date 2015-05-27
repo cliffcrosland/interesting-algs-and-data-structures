@@ -19,10 +19,10 @@ public class DijkstraShortestPath {
             GraphNode node = queue.poll();
             GraphEdgePath path = shortestPathsMap.get(node);
             for (GraphEdge edge : node.edges) {
-                GraphEdgePath nextPath = path.newPathByAppendingEdge(edge);
                 boolean shouldExplore = !shortestPathsMap.containsKey(edge.to) ||
-                        nextPath.cost < shortestPathsMap.get(edge.to).cost;
+                        path.cost + edge.value < shortestPathsMap.get(edge.to).cost;
                 if (shouldExplore) {
+                    GraphEdgePath nextPath = path.newPathByAppendingEdge(edge);
                     shortestPathsMap.put(edge.to, nextPath);
                     queue.add(edge.to);
                 }
