@@ -6,9 +6,6 @@ import com.cliffcrosland.graph.GraphNode;
 
 import java.util.*;
 
-/**
- * Created by cliftoncrosland on 5/27/15.
- */
 public class KruskalMinSpanningTree {
     public static Set<GraphEdge> findMinSpanningTree(Graph graph) {
         List<GraphEdge> sortedEdges = new ArrayList<GraphEdge>(graph.edges);
@@ -20,27 +17,62 @@ public class KruskalMinSpanningTree {
                 return 0;
             }
         });
-        Map<GraphNode, Set<GraphNode>> forestMap = new HashMap<GraphNode, Set<GraphNode>>();
+        Map<GraphNode, UnionFindTreeNode> unionFindMap = new HashMap<GraphNode, UnionFindTreeNode>();
+        int label = 0;
         for (GraphNode node : graph.nodes) {
-            forestMap.put(node, new HashSet<GraphNode>(Arrays.asList(node)));
+            unionFindMap.put(node, new UnionFindTreeNode(++label));
         }
         Set<GraphEdge> minSpanningTree = new HashSet<GraphEdge>();
         for (GraphEdge edge : sortedEdges) {
-            Set<GraphNode> fromTree = forestMap.get(edge.from);
-            Set<GraphNode> toTree = forestMap.get(edge.to);
-            if (fromTree == toTree) continue;
-            Set<GraphNode> unionTree = union(fromTree, toTree);
-            for (GraphNode node : unionTree) {
-                forestMap.put(node, unionTree);
-            }
+            UnionFindTreeNode fromTreeRoot = unionFindMap.get(edge.from).getRoot();
+            UnionFindTreeNode toTreeRoot = unionFindMap.get(edge.to).getRoot();
+            if (fromTreeRoot.label == toTreeRoot.label) continue;
+            UnionFindTreeNode.merge(fromTreeRoot, toTreeRoot);
             minSpanningTree.add(edge);
         }
         return minSpanningTree;
     }
 
-    private static Set<GraphNode> union(Set<GraphNode> a, Set<GraphNode> b) {
-        Set<GraphNode> union = new HashSet<GraphNode>(a);
-        union.addAll(b);
-        return union;
+    private static class UnionFindTreeNode {
+        public int label;
+        public int rank;
+        public UnionFindTreeNode parent;
+
+        public UnionFindTreeNode(int label) {
+            this.label = label;
+            this.rank = 1;
+            this.parent = null;
+        }
+
+        public UnionFindTreeNode getRoot() {
+            if (parent == null) {
+                return this;
+            }
+            // To improve the run-time of future calls, connect self directly to root.
+            parent = parent.getRoot();
+            return parent;
+        }
+
+        public static void merge(UnionFindTreeNode rootA, UnionFindTreeNode rootB) {
+            assertIsRoot(rootA);
+            assertIsRoot(rootB);
+            UnionFindTreeNode smaller, larger;
+            if (rootA.rank < rootB.rank) {
+                smaller = rootA;
+                larger = rootB;
+            } else {
+                smaller = rootB;
+                larger = rootA;
+            }
+            smaller.parent = larger;
+            larger.rank += smaller.rank;
+        }
+
+        private static void assertIsRoot(UnionFindTreeNode root) {
+            if (root.parent != null) {
+                throw new IllegalArgumentException("root's parent is not null, so it is not a root");
+            }
+        }
     }
+
 }
