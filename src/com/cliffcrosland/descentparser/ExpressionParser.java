@@ -23,13 +23,14 @@ public class ExpressionParser {
     // E -> T op E
     // T -> (E)
     // T -> number
+    // T -> identifier
     private static Expression parseExpression(Tokens tokens, int prec) {
         Expression exp = parseTerm(tokens);
         String token;
         while (tokens.hasMoreTokens()) {
             token = tokens.nextToken();
             int newPrec = Tokens.precedence(token);
-            if (newPrec < prec || ")".equals(token)) {
+            if (newPrec <= prec) {
                 tokens.saveToken(token);
                 break;
             }
@@ -53,7 +54,11 @@ public class ExpressionParser {
         if (Tokens.isValue(token)) {
             return new ValueExpression(token);
         }
-        throw new InvalidExpressionException("Term first token is not a paren nor a value: " + token);
+        if (Tokens.isIdentifier(token)) {
+            return new IdentifierExpression(token);
+        }
+        throw new InvalidExpressionException("Term first token is not a paren, a value, nor an identifier: '" +
+                token + "'");
     }
 
     public static class InvalidExpressionException extends RuntimeException {

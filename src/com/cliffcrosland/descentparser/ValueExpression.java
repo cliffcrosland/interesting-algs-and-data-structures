@@ -14,7 +14,7 @@ public class ValueExpression implements Expression {
         this.value = Double.parseDouble(value);
     }
 
-    public double value() {
+    public double eval(InterpreterState state) {
         return value;
     }
 }

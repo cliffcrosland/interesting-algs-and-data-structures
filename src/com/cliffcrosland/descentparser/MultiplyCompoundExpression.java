@@ -9,8 +9,8 @@ public class MultiplyCompoundExpression extends CompoundExpression {
         super(lhs, rhs);
     }
 
-    public double value() {
-        return lhs.value() * rhs.value();
+    public double eval(InterpreterState state) {
+        return lhs.eval(state) * rhs.eval(state);
     }
 
 }

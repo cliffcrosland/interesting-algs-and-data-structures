@@ -16,7 +16,7 @@ public class Tokens {
     }
 
     public static Tokens tokenize(String str) {
-        Pattern p = Pattern.compile("([\\(\\)\\+\\-\\*/])|(\\d+\\.?\\d*)|(\\s+)");
+        Pattern p = Pattern.compile("([\\(\\)\\+\\-\\*/=])|(\\d+\\.?\\d*)|[\\w\\d]+|(\\s+)");
         Matcher m = p.matcher(str);
         List<String> tokens = new ArrayList<String>();
         int totalTokenLength = 0;
@@ -29,11 +29,6 @@ public class Tokens {
         if (totalTokenLength != str.length()) {
             throw new RuntimeException("Invalid expression. Some tokens were unrecognized.");
         }
-        /*
-        for (String token : tokens) {
-            System.out.println("|" + token + "|");
-        }
-        */
         return new Tokens(tokens);
     }
 
@@ -50,7 +45,7 @@ public class Tokens {
     }
 
     public static boolean isOperator(String token) {
-        String[] operators = new String[] { "+", "-", "*", "/" };
+        String[] operators = new String[] { "+", "-", "*", "/", "=" };
         for (String op : operators) {
             if (op.equals(token)) return true;
         }
@@ -66,14 +61,26 @@ public class Tokens {
         }
     }
 
+    public static boolean isIdentifier(String token) {
+        Pattern p = Pattern.compile("\\w[\\w\\d]*");
+        Matcher m = p.matcher(token);
+        m.find();
+        String match = m.group();
+        return token.equals(match);
+    }
+
     public static int precedence(String operator) {
-        String[] small = new String[] { "+", "-" };
+        String[] small = new String[] { "=" };
+        String[] medium = new String[] { "+", "-" };
         String[] big = new String[] { "*", "/" };
         for (String op : small) {
             if (op.equals(operator)) return 1;
         }
-        for (String op : big) {
+        for (String op : medium) {
             if (op.equals(operator)) return 2;
+        }
+        for (String op : big) {
+            if (op.equals(operator)) return 3;
         }
         return 0;
     }

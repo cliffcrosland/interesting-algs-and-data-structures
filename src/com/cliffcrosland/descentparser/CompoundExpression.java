@@ -8,12 +8,14 @@ public abstract class CompoundExpression implements Expression {
     protected Expression lhs;
     protected Expression rhs;
 
+    protected CompoundExpression() {}
+
     protected CompoundExpression(Expression lhs, Expression rhs) {
         this.lhs = lhs;
         this.rhs = rhs;
     }
 
-    public abstract double value();
+    public abstract double eval(InterpreterState state);
 
     public static CompoundExpressionBuilder builder() {
         return new CompoundExpressionBuilder();
@@ -47,6 +49,8 @@ public abstract class CompoundExpression implements Expression {
                 return new MultiplyCompoundExpression(lhs, rhs);
             } else if ("/".equals(token)) {
                 return new DivideCompoundExpression(lhs, rhs);
+            } else if ("=".equals(token)) {
+                return new IdentifierAssignmentCompoundExpression(lhs, rhs);
             }
             throw new RuntimeException("token is not an operator");
         }
