@@ -86,8 +86,8 @@ public class KirkpatrickSeidelMaxima {
     //  - And that leads us straight to our SUM! Our function f says that we do |Si| work log(n / |Si|) times. Summed
     //    over all of the boxes, that gives us the sum: SUM_(i=1)^(k) |Si| * log (n / |Si|).
     public static List<Point2> findUndominatedMaxima(List<Point2> points) {
-        List<Point2> copyOfPoints = new ArrayList<Point2>(points);
-        List<Point2> maxima = new ArrayList<Point2>();
+        List<Point2> copyOfPoints = new ArrayList<>(points);
+        List<Point2> maxima = new ArrayList<>();
         recursiveFindUndominatedMaxima(copyOfPoints, maxima);
         return maxima;
     }
@@ -98,9 +98,9 @@ public class KirkpatrickSeidelMaxima {
             maxima.add(points.get(0));
             return;
         }
-        Quickselect.selectInPlace(points, points.size() / 2, xComparator());
-        List<Point2> left = points.subList(0, points.size() / 2);
-        List<Point2> right = points.subList(points.size() / 2, points.size());
+        Point2 pivot = Quickselect.selectInPlace(points, points.size() / 2, xComparator());
+        List<Point2> left = getRange(points, 0, points.size() / 2);
+        List<Point2> right = getRange(points, points.size() / 2, points.size());
         Point2 maximum = findMax(right, yComparator());
         maxima.add(maximum);
         left = withoutDominated(left, maximum);
@@ -112,7 +112,7 @@ public class KirkpatrickSeidelMaxima {
     private static Point2 findMax(List<Point2> points, Comparator<Point2> comp) {
         Point2 max = null;
         for (Point2 point : points) {
-            if (max == null || comp.compare(point, max) < 0) {
+            if (max == null || comp.compare(point, max) > 0) {
                 max = point;
             }
         }
@@ -120,30 +120,29 @@ public class KirkpatrickSeidelMaxima {
     }
 
     private static List<Point2> withoutDominated(List<Point2> points, Point2 maximum) {
-        List<Point2> ret = new ArrayList<Point2>();
+        List<Point2> ret = new ArrayList<>();
         for (Point2 point : points) {
-            if (maximum.x > point.x && maximum.y > point.y) {
-                ret.add(point);
+            if (maximum.x >= point.x && maximum.y >= point.y) {
+                continue;
             }
+            ret.add(point);
+        }
+        return ret;
+    }
+
+    private static List<Point2> getRange(List<Point2> points, int start, int end) {
+        List<Point2> ret = new ArrayList<>();
+        for (int i = start; i < end; i++) {
+            ret.add(points.get(i));
         }
         return ret;
     }
 
     private static Comparator<Point2> xComparator() {
-        return new Comparator<Point2>() {
-            @Override
-            public int compare(Point2 a, Point2 b) {
-                return a.x - b.x;
-            }
-        };
+        return (a, b) -> a.x - b.x;
     }
 
     private static Comparator<Point2> yComparator() {
-        return new Comparator<Point2>() {
-            @Override
-            public int compare(Point2 a, Point2 b) {
-                return a.y - b.y;
-            }
-        };
+        return (a, b) -> a.y - b.y;
     }
 }

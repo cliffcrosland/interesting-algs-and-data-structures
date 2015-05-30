@@ -10,22 +10,36 @@ import java.util.*;
  */
 public class KirkpatrickSeidelMaximaTest {
     public static void runStressTests() {
-        System.out.println("Running tests...");
-        for (int i = 0; i < 100; i++) {
-            if (i % 10 == 0) {
-                System.out.println("Completed " + i + " tests...");
-            }
+        int numTests = 20;
+        System.out.println("Running tests on Kirkpatrick Seidel maxima alg...");
+        for (int i = 0; i < numTests; i++) {
             runTest();
         }
-        System.out.println("DONE. All tests completed successfully!");
+        System.out.println("DONE. All " + numTests + " tests completed successfully!");
     }
 
     public static void runTest() {
-        int numPoints = 50;
+        int numPoints = 30000;
         List<Point2> points = generateRandomPoints(numPoints);
+
+        System.out.print("Computing kirkpatrick seidel... ");
+        long start = System.currentTimeMillis();
         List<Point2> ksMaxima = KirkpatrickSeidelMaxima.findUndominatedMaxima(points);
+        long end = System.currentTimeMillis();
+        System.out.println("Took " + (end - start) + " ms.");
+
+        System.out.print("Computing naive brute force... ");
+        start = System.currentTimeMillis();
         List<Point2> naiveMaxima = findMaximaNaively(points);
+        end = System.currentTimeMillis();
+        System.out.println("Took " + (end - start) + " ms.");
+        System.out.println();
+
         if (!areEqualPointLists(ksMaxima, naiveMaxima)) {
+            System.out.println("KS maxima:");
+            System.out.println(getStringRepresentation(ksMaxima));
+            System.out.println("Naive brute-force maxima:");
+            System.out.println(getStringRepresentation(naiveMaxima));
             throw new RuntimeException("Maxima lists are not the same!");
         }
     }
@@ -33,12 +47,12 @@ public class KirkpatrickSeidelMaximaTest {
     private static List<Point2> generateRandomPoints(int numPoints) {
         Set<Integer> xSet = new HashSet<Integer>();
         while (xSet.size() < numPoints) {
-            int rand = (int) (Math.random() * 1000);
+            int rand = (int) (Math.random() * numPoints * 10);
             xSet.add(rand);
         }
         Set<Integer> ySet = new HashSet<Integer>();
         while (ySet.size() < numPoints) {
-            int rand = (int) (Math.random() * 1000);
+            int rand = (int) (Math.random() * numPoints * 10);
             ySet.add(rand);
         }
         List<Integer> xList = new ArrayList<Integer>(xSet);
@@ -51,19 +65,16 @@ public class KirkpatrickSeidelMaximaTest {
     }
 
     private static boolean areEqualPointLists(List<Point2> a, List<Point2> b) {
-        List<String> aStrs = new ArrayList<String>();
-        for (Point2 point : a) {
-            aStrs.add("(" + point.x + "," + point.y + ")");
+        return getStringRepresentation(a).equals(getStringRepresentation(b));
+    }
+
+    public static String getStringRepresentation(List<Point2> points) {
+        List<String> strs = new ArrayList<String>();
+        for (Point2 point : points) {
+            strs.add("(" + point.x + "," + point.y + ")");
         }
-        List<String> bStrs = new ArrayList<String>();
-        for (Point2 point : b) {
-            bStrs.add("(" + point.x + "," + point.y + ")");
-        }
-        aStrs.sort(Comparator.<String>naturalOrder());
-        bStrs.sort(Comparator.<String>naturalOrder());
-        String aStr = String.join(",", aStrs);
-        String bStr = String.join(",", bStrs);
-        return aStr.equals(bStr);
+        strs.sort(Comparator.naturalOrder());
+        return String.join(",", strs);
     }
 
     private static List<Point2> findMaximaNaively(List<Point2> points) {
