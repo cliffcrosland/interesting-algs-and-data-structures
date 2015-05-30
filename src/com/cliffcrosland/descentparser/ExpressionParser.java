@@ -1,5 +1,10 @@
 package com.cliffcrosland.descentparser;
 
+import com.cliffcrosland.descentparser.expressions.CompoundExpression;
+import com.cliffcrosland.descentparser.expressions.Expression;
+import com.cliffcrosland.descentparser.expressions.IdentifierExpression;
+import com.cliffcrosland.descentparser.expressions.ValueExpression;
+
 /**
  * Created by Cliff on 5/29/2015.
  */

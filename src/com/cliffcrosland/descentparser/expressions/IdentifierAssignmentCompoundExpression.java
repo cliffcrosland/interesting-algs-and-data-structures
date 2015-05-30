@@ -1,4 +1,6 @@
-package com.cliffcrosland.descentparser;
+package com.cliffcrosland.descentparser.expressions;
+
+import com.cliffcrosland.descentparser.InterpreterState;
 
 /**
  * Created by Cliff on 5/29/2015.

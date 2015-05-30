@@ -1,6 +1,6 @@
 package com.cliffcrosland.descentparser.test;
 
-import com.cliffcrosland.descentparser.Expression;
+import com.cliffcrosland.descentparser.expressions.Expression;
 import com.cliffcrosland.descentparser.ExpressionParser;
 import com.cliffcrosland.descentparser.InterpreterState;
 
@@ -9,8 +9,7 @@ import com.cliffcrosland.descentparser.InterpreterState;
  */
 public class ExpressionParserTest {
     public static void runTests() {
-        System.out.println("Running tests...");
-        InterpreterState state = new InterpreterState();
+        System.out.println("Running test cases...");
         String[] testCases = new String[] {
                 "3 * 4 + 2 => 14",
                 "3 * (4 + 2) => 18",
@@ -26,12 +25,13 @@ public class ExpressionParserTest {
                 "bar - foo => 11",
                 "bar - foo => 11",
                 "baz = bar - foo + 7 * 3 => 32",
-                "baz => 32"
+                "baz => 32",
         };
+        InterpreterState state = new InterpreterState();
         for (String test : testCases) {
             runTestCase(test, state);
         }
-        System.out.println("DONE. All tests passed successfully!");
+        System.out.println("DONE. All " + testCases.length + " test cases passed successfully!");
     }
 
     private static void runTestCase(String test, InterpreterState state) {

@@ -1,5 +1,7 @@
 package com.cliffcrosland.descentparser;
 
+import com.cliffcrosland.descentparser.expressions.Expression;
+
 import java.util.HashMap;
 import java.util.Map;
 

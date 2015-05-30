@@ -16,7 +16,7 @@ public class Tokens {
     }
 
     public static Tokens tokenize(String str) {
-        Pattern p = Pattern.compile("([\\(\\)\\+\\-\\*/=])|(\\d+\\.?\\d*)|[\\w\\d]+|(\\s+)");
+        Pattern p = Pattern.compile("([\\(\\)\\+\\-\\*/=])|(\\d+\\.?\\d*)|\\w[\\w\\d]*|(\\s+)");
         Matcher m = p.matcher(str);
         List<String> tokens = new ArrayList<String>();
         int totalTokenLength = 0;
