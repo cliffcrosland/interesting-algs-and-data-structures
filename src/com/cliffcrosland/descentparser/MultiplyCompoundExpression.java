@@ -1,0 +1,16 @@
+package com.cliffcrosland.descentparser;
+
+/**
+ * Created by Cliff on 5/29/2015.
+ */
+public class MultiplyCompoundExpression extends CompoundExpression {
+
+    public MultiplyCompoundExpression(Expression lhs, Expression rhs) {
+        super(lhs, rhs);
+    }
+
+    public double value() {
+        return lhs.value() * rhs.value();
+    }
+
+}
