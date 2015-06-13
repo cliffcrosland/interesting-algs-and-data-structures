@@ -1,28 +1,28 @@
-package com.cliffcrosland.kruskal.test;
+package com.cliffcrosland.prim.test;
 
 import com.cliffcrosland.graph.Graph;
 import com.cliffcrosland.graph.GraphEdge;
 import com.cliffcrosland.graph.test.GraphTestUtils;
-import com.cliffcrosland.kruskal.KruskalMinSpanningTree;
+import com.cliffcrosland.prim.PrimMinSpanningTree;
 
 import java.util.List;
 import java.util.Set;
 
-public class KruskalMinSpanningTreeTests {
+public class PrimMinSpanningTreeTests {
     private static final boolean DEBUG = true;
 
     public static void runTestCasesFromFile() {
-        String path = "./src/com/cliffcrosland/kruskal/test/kruskal-test-cases.txt";
+        String path = "./src/com/cliffcrosland/prim/test/prim-test-cases.txt";
         System.out.println("Reading test cases from file: '" + path + "'...");
         List<GraphTestUtils.GraphTestCase> testCases = GraphTestUtils.readTestCasesFromFile(path);
         System.out.println("Found " + testCases.size() + " test cases. Running...");
         for (GraphTestUtils.GraphTestCase testCase : testCases) {
-            Set<GraphEdge> minSpanningTree = KruskalMinSpanningTree.findMinSpanningTree(testCase.graph);
+            Set<GraphEdge> minSpanningTree = PrimMinSpanningTree.findMinSpanningTree(testCase.graph);
             if (GraphTestUtils.treeCost(minSpanningTree) - GraphTestUtils.treeCost(testCase.solution) > 1e-4) {
                 println("Test case failed!");
                 println("Graph:");
                 printTree(testCase.graph.edges);
-                println("Kruskal min span tree:");
+                println("Prim min span tree:");
                 println("Cost: " + GraphTestUtils.treeCost(minSpanningTree));
                 printTree(minSpanningTree);
                 println("Expected solution:");
@@ -40,8 +40,8 @@ public class KruskalMinSpanningTreeTests {
         double maxEdgeValue = 100.0;
         Graph graph = GraphTestUtils.createRandomUndirectedConnectedGraph(numNodes, maxNumEdgesPerNode, maxEdgeValue);
 
-        println("# Kruskal min spanning tree #");
-        Set<GraphEdge> minSpanningTree = KruskalMinSpanningTree.findMinSpanningTree(graph);
+        println("# Prim min spanning tree #");
+        Set<GraphEdge> minSpanningTree = PrimMinSpanningTree.findMinSpanningTree(graph);
         println("Cost: " + GraphTestUtils.treeCost(minSpanningTree));
         printTree(minSpanningTree);
 
@@ -52,7 +52,7 @@ public class KruskalMinSpanningTreeTests {
         println("");
 
         if (GraphTestUtils.treeCost(minSpanningTree) - GraphTestUtils.treeCost(bruteForceMinSpanningTree) > 1e-4) {
-            throw new RuntimeException("Kruskal min spanning tree cost is greater than brute force spanning tree cost");
+            throw new RuntimeException("Prim min spanning tree cost is greater than brute force spanning tree cost");
         }
     }
 
@@ -72,5 +72,4 @@ public class KruskalMinSpanningTreeTests {
         }
         println("");
     }
-
 }
