@@ -16,8 +16,15 @@ public class PrimMinSpanningTree {
     // frontier.
     //
     // We use a min-heap to keep track of edges at the frontier and pop off the minimum. The min-heap will have size
-    // O(E), so inserting a new edge takes O(log E) time, and popping off the minimum takes O(log E) time. All together
-    // we expect to do O(log E) operations E times, or O(E log E) = O(E log V^2) = O(E * 2 log V) = O(E log V).
+    // O(E), so inserting a new edge takes O(log E) time, and popping off the minimum takes O(log E) time. We might
+    // have to run pop-min several times until we find an edge that is on the frontier, since edges that were on the
+    // frontier when originally added may no longer be on the frontier when they pop out of the heap. However, each
+    // edge will be added at most once when on the frontier, and will be removed at most once when a minimum. Thus,
+    // each edge contributes 2 * O(log E) work, which is O(log E). There are E edges, so they contribute a total of
+    // O(E log E) work all together.
+    //
+    // In summary, we expect to do O(log E) operations E times, or O(E log E) = O(E log V^2) = O(E * 2 log V) =
+    // O(E log V).
     public static Set<GraphEdge> findMinSpanningTree(Graph graph) {
         Set<GraphEdge> ret = new HashSet<>();
         Set<GraphNode> spanned = new HashSet<>();
@@ -29,6 +36,7 @@ public class PrimMinSpanningTree {
         spanned.add(newNode);
         while (spanned.size() < graph.nodes.size()) {
             for (GraphEdge edge : newNode.edges) {
+                if (spanned.contains(edge.from) && spanned.contains(edge.to)) continue;
                 edgeHeap.add(new CGraphEdge(edge));
             }
             GraphEdge min = getMinFrontierEdge(edgeHeap, spanned);
