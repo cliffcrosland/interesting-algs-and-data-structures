@@ -184,7 +184,7 @@ public class KruskalMinSpanningTree {
             // To improve the run-time of future calls, connect self directly to root so that future getRoot() calls
             // run faster.
             //
-            // This optimization is kind of AMAZING. O(V log V) work done to find root nodes becomes O(E log* V).
+            // This optimization is kind of AMAZING. O(E log V) work done to find root nodes becomes O(E log* V).
             // You can read more about the function in the intro text, but for example, log*(2^65536) =
             // log*(a number unimaginably bigger than the estimated number of atoms in the universe) = 5.
             parent = parent.getRoot();
